@@ -136,8 +136,8 @@ $(BLD_DIR_ENV)/stamp:
 	@echo "--- Creating virtual environment at $(BLD_DIR_ENV)"
 ifeq ($(PYTHON_VER),python2.7)
 	@$(SYS_PYTHON) $(VIRTUAL_BOOTSTRAP) $(VIRTUALENV_OPTS) --system-site-packages $(BLD_DIR_ENV)
-else ifeq ($(PYTHON_VER),python3.8)
-	@$(SYS_PYTHON) -m pip install --upgrade pip==22.2.2
+else if [[ ${PYTHON_VER} -ge python3.8 ]]
+	@$(SYS_PYTHON) -m pip install --upgrade pip==23.0.1
 	@$(SYS_PIP) install virtualenv==20.16.5 virtualenv-make-relocatable==0.0.1
 	@if [[ "ppc64le" == $(PPC64LE) ]]; then \
 	  $(SYS_PYTHON) -m venv $(BLD_DIR_ENV); \
