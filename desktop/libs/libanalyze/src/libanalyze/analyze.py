@@ -233,10 +233,10 @@ class Node(object):
       return None
     m = re.search(r'Instance\s(.*?)\s\(host=(.*?)\)', c.val.name)
     if m:
-        #frag.instance_id = m.group(1)
-        #frag.host = m.group(2)
-        #frag_node = c
-        return m.group(2)
+      #frag.instance_id = m.group(1)
+      #frag.host = m.group(2)
+      #frag_node = c
+      return m.group(2)
 
   def augmented_host(self):
     if self.is_fragment_instance():
@@ -256,10 +256,10 @@ class Node(object):
       return None
     m = re.search(r'Instance\s(.*?)\s\(host=(.*?)\)', c.val.name)
     if m:
-        #frag.instance_id = m.group(1)
-        #frag.host = m.group(2)
-        #frag_node = c
-        return m.group(2)
+      #frag.instance_id = m.group(1)
+      #frag.host = m.group(2)
+      #frag_node = c
+      return m.group(2)
 
   def info_strings(self):
     return self.val.info_strings
@@ -273,15 +273,15 @@ class Node(object):
   def counter_map(self):
     ctr = {}
     if self.val.counters:
-        for c in self.val.counters:
-            ctr[c.name] = c
+      for c in self.val.counters:
+        ctr[c.name] = c
     return ctr
 
   def metric_map(self):
     ctr = {}
     if self.val.counters:
-        for c in self.val.counters:
-            ctr[c.name] = { 'name': c.name, 'value': to_double(c.value) if c.unit == 6 else c.value, 'unit': c.unit }
+      for c in self.val.counters:
+        ctr[c.name] = {'name': c.name, 'value': to_double(c.value) if c.unit == 6 else c.value, 'unit': c.unit}
     return ctr
 
   def event_list(self):
@@ -295,7 +295,9 @@ class Node(object):
         for i in range(len(s.labels)):
           event_duration = s.timestamps[i] - start_time
           event_name = s.labels[i]
-          event_list[sequence_name].append({'name': event_name, 'value': s.timestamps[i], 'unit': 5, 'start_time': start_time, 'duration': event_duration})
+          event_list[sequence_name].append(
+            {'name': event_name, 'value': s.timestamps[i], 'unit': 5, 'start_time': start_time, 'duration': event_duration}
+          )
           start_time = s.timestamps[i]
     return event_list
 
@@ -339,8 +341,23 @@ def summary(profile):
   counter_map_execution_profile = execution_profile.counter_map()
   host_list = models.host_by_metric(profile, 'PeakMemoryUsage', exprs=[max])
   host_list = sorted(host_list, key=lambda x: x[1], reverse=True)
-  peak_memory = models.TCounter(value=host_list[0][1], unit=3) if host_list else models.TCounter(value=0, unit=3) # The value is not always present
-  return [{ 'key': 'PlanningTime', 'value': counter_map['PlanningTime'].value, 'unit': counter_map['PlanningTime'].unit }, {'key': 'RemoteFragmentsStarted', 'value': counter_map['RemoteFragmentsStarted'].value, 'unit': counter_map['RemoteFragmentsStarted'].unit}, {'key': 'TotalTime', 'value': counter_map_execution_profile['TotalTime'].value, 'unit': counter_map_execution_profile['TotalTime'].unit}, {'key': 'PeakMemoryUsage', 'value': peak_memory.value, 'unit': peak_memory.unit}]
+  # The value is not always present
+  peak_memory = models.TCounter(value=host_list[0][1], unit=3) if host_list else models.TCounter(value=0, unit=3)
+  return [
+    {
+      'key': 'PlanningTime', 'value': counter_map['PlanningTime'].value, 'unit': counter_map['PlanningTime'].unit
+    },
+    {
+      'key': 'RemoteFragmentsStarted', 'value': counter_map['RemoteFragmentsStarted'].value,
+      'unit': counter_map['RemoteFragmentsStarted'].unit
+    },
+    {
+      'key': 'TotalTime', 'value': counter_map_execution_profile['TotalTime'].value, 'unit': counter_map_execution_profile['TotalTime'].unit
+    },
+    {
+      'key': 'PeakMemoryUsage', 'value': peak_memory.value, 'unit': peak_memory.unit
+    }
+  ]
 
 def metrics(profile):
   execution_profile = profile.find_by_name('Execution Profile')
@@ -374,7 +391,7 @@ def metrics(profile):
     host = node.augmented_host()
     metric_map = node.metric_map()
     if counter_map['nodes'].get(nid) is None:
-      counter_map['nodes'][nid] = {'properties': { 'hosts': {} }, 'children': { }, 'timeline': {'hosts': {}}, 'other': {}}
+      counter_map['nodes'][nid] = {'properties': {'hosts': {}}, 'children': {}, 'timeline': {'hosts': {}}, 'other': {}}
 
     event_list = node.event_list();
 
@@ -396,8 +413,8 @@ def metrics(profile):
   execution_profile.foreach_lambda(flatten)
 
   for nodeid, node in counter_map['nodes'].items():
-    host_min = {'value': sys.maxsize, 'host' : None}
-    host_max = {'value': -(sys.maxsize - 1), 'host' : None}
+    host_min = {'value': sys.maxsize, 'host': None}
+    host_max = {'value': -(sys.maxsize - 1), 'host': None}
     if not node['timeline']['minmax']:
       continue
     for host_name, host_value in node['timeline']['hosts'].items():
@@ -435,7 +452,7 @@ def heatmap_by_host(profile, counter_name):
         float(r[1]) / float(max_max) if float(max_max) != 0 else 0,
         float(r[2]) / float(sum_sum) if float(sum_sum) != 0 else 0,
         rows.unit])
-  return { 'data': result, 'max': max_max, 'unit': rows.unit }
+  return {'data': result, 'max': max_max, 'unit': rows.unit}
 
 def parse(file_name):
   """Given a file_name, open the file and decode the first line of the file
@@ -444,17 +461,17 @@ def parse(file_name):
     for line in fid:
       val = decodebytes(line.strip())
       try:
-          val = decompress(val.strip())
+        val = decompress(val.strip())
       except:
-          pass
+        pass
       return decode_thrift(val)
 
 def parse_data(data):
   val = decodebytes(data)
   try:
-      val = decompress(val.strip())
+    val = decompress(val.strip())
   except:
-      pass
+    pass
   return decode_thrift(val)
 
 def pre_order_traversal(nodes, index, level=0):
@@ -462,8 +479,8 @@ def pre_order_traversal(nodes, index, level=0):
   node = Node(nodes[index])
   pos = index
   for x in range(node.val.num_children):
-      child_node, pos = pre_order_traversal(nodes, pos + 1, level + 1)
-      node.add_child(child_node)
+    child_node, pos = pre_order_traversal(nodes, pos + 1, level + 1)
+    node.add_child(child_node)
   return node, pos
 
 def analyze(profile):
@@ -493,10 +510,10 @@ def to_json(profile):
 
 def print_tree(node, level, indent):
   if level == 0:
-      return
+    return
   print(node.repr(indent))
   for c in node.children:
-      print_tree(c, level - 1, indent + "  ")
+    print_tree(c, level - 1, indent + "  ")
 
 
 if __name__ == '__main__':
